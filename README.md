@@ -1,60 +1,67 @@
-# Breakdown of the Code
+# Bun HTTP Server with Custom Error Handling
 
-Here's a detailed breakdown of the provided code snippet:
+This example demonstrates how to set up an HTTP server using Bun with custom error handling. The server processes incoming requests and provides specific responses based on the request path. Errors are caught and handled to return informative error messages to the client.
 
-```javascript
-const server = Bun.serve({
-  fetch(req, server) {
-    const ip = server.requestIP(req);
-    return new Response(`Your IP is ${ip}`);
-  },
-});
-```
+## Overview
 
-### Explanation
+- **Request Handling**: Processes incoming HTTP requests.
+- **Error Handling**: Catches and formats errors to provide detailed responses.
 
-1. **`Bun.serve({...})`**:
-   - This method starts an HTTP server with the specified configuration. The configuration object includes the `fetch` function that handles incoming requests.
-
-2. **`fetch(req, server)`**:
-   - The `fetch` function is used to handle HTTP requests. It receives two arguments:
-     - `req`: The incoming request object.
-     - `server`: The server object associated with the HTTP server.
-
-3. **`server.requestIP(req)`**:
-   - This method of the `server` object retrieves the IP address of the client making the request. It's useful for logging or responding with client-specific information.
-
-4. **`return new Response(...)`**:
-   - Creates a new `Response` object that is sent back to the client. In this case, it sends a response containing the client's IP address.
-
-### Example Use Case
-
-In this example, when a request is made to the server, the server responds with the client's IP address. This can be useful for debugging, logging, or providing customized responses based on the client's information.
-
-### Complete Example
-
-Here’s a complete example of using this approach with Bun:
+## Code Example
 
 ```javascript
 const server = Bun.serve({
-  fetch(req, server) {
-    const ip = server.requestIP(req);
-    return new Response(`Your IP is ${ip}`);
-  },
-});
+  fetch(req) {
+    const url = new URL(req.url);
 
-console.log(`Server running on http://localhost:${server.port}`);
+    if (url.pathname === "/feed") {
+      throw new Error('Could not fetch feed');
+    }
+
+    return new Response("Error 404");
+  },
+  error(error) {
+    return new Response(`<pre>${error.message} \n ${error.stack}</pre>`, {
+      headers: {
+        'Content-Type': 'text/html'
+      }
+    });
+  }
+});
 ```
 
-In this example:
+## Explanation
 
-- The server starts and listens for incoming HTTP requests.
-- The `fetch` handler extracts the client's IP address and includes it in the response.
-- The server logs the port it is running on.
+### `fetch(req)`
 
-### Notes
+- **Purpose**: Handles incoming HTTP requests and determines how to respond.
+- **`const url = new URL(req.url);`**: Converts the request URL into a `URL` object for easy manipulation and inspection of URL components.
+- **`if (url.pathname === "/feed")`**: Checks if the request path is `/feed`.
+- **`throw new Error('Could not fetch feed');`**: Throws an error if the path is `/feed`. This error is caught by the `error` function.
+- **`return new Response("Error 404");`**: Returns a 404 response for any other paths.
 
-- **Server Methods**: The `server` object may have other useful methods depending on the Bun version and implementation. Refer to the Bun documentation for a complete list of available methods.
-- **Client IP Address**: The method `server.requestIP(req)` is specific to Bun and might not be available or may differ in other environments or frameworks.
+### `error(error)`
 
-This functionality makes it easy to access server-related utilities and metadata while handling HTTP requests in Bun.
+- **Purpose**: Handles errors thrown in the `fetch` handler and formats error responses.
+- **`return new Response(`<pre>${error.message} \n ${error.stack}</pre>`, { ... });`**: Creates an HTML response that includes the error message and stack trace. This response format is useful for debugging.
+- **`headers: { 'Content-Type': 'text/html' }`**: Sets the content type of the response to `text/html`, ensuring that the browser renders the error information correctly.
+
+## Handling Errors
+
+- **Throwing Errors**: Errors thrown in the `fetch` handler are caught by the `error` function.
+- **Error Responses**: The `error` function formats the error message and stack trace in HTML and returns it as the response. This provides detailed error information which can be helpful for debugging purposes.
+
+## Notes
+
+- **Error Details**: Including detailed error information, such as stack traces, in production environments can be risky due to potential security implications. Consider providing user-friendly error messages instead of exposing internal details.
+- **Custom Error Pages**: For a better user experience, customize error responses to be informative and aesthetically pleasing. Tailor error messages to be more user-friendly and avoid exposing sensitive internal information.
+
+## Summary
+
+This example illustrates how to set up an HTTP server in Bun with custom error handling. It processes incoming requests and provides specific responses based on the request path. If an error occurs, it is caught by the `error` function, which formats and returns a detailed HTML response containing the error details.
+
+For more information on Bun and its features, visit the [official Bun documentation](https://bun.sh/docs).
+
+---
+
+Feel free to adjust the content to match the specific needs and conventions of your project!
