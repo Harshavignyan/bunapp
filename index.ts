@@ -1,16 +1,22 @@
-// The fetch handler handles incoming requests. 
-// It receives a Request object and returns a Response or 
-// Promise<Response>.
+// The fetch handler supports async/await:
 
-const server = Bun.serve({
+import { sleep, serve } from "bun";
+
+const server = serve({
     port: 3000,
-    fetch(req){
+    async fetch(req) {
         const url = new URL(req.url);
-        if (url.pathname === "/"){
+        if (url.pathname === "/") {
             return new Response("Home Page!");
         }
-        if (url.pathname === "/about"){
+        if (url.pathname === "/about") {
             return new Response("We are Tesseract Esports LLP!")
+        }
+        if (url.pathname === "/sleep") {
+            const start = performance.now();  // Record the start time
+            await sleep(10);                 // Sleep for 10 milliseconds
+            const end = performance.now();    // Record the end time
+            return new Response(`Slept for ${end - start}ms`);  // Respond with the elapsed time
         }
         return new Response("Error 404");
     }
