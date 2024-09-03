@@ -1,15 +1,14 @@
-// In Bun, you can handle HTTP requests and responses in 
-// a manner similar to how you might in other JavaScript 
-// environments that support Promises. This allows you to 
-// perform asynchronous operations, such as forwarding requests 
-// to another server or performing other asynchronous tasks 
-// before sending a response.
+// In Bun, when you use the fetch function with the
+// serve method, you can access the server object as 
+// the second argument in addition to the request object.
+// This server object provides additional methods and 
+// properties that can be useful for handling requests.
 
 import { sleep, serve } from "bun";
 
 const server = serve({
     port: 3000,
-    async fetch(req) {
+    async fetch(req, server) {
         const url = new URL(req.url);
         if (url.pathname === "/") {
             return new Response("Home Page!");
@@ -32,6 +31,10 @@ const server = serve({
                 status: response.status,
                 headers: response.headers
             });
+        }
+        if (url.pathname === "/fetchserver") {
+            const ip = server.requestIP(req);
+            return new Response(`Your IP is ${ip}`);
         }
         return new Response("Error 404");
     }
