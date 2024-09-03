@@ -36,7 +36,18 @@ const server = serve({
             const ip = server.requestIP(req);
             return new Response(`Your IP is ${ip}`);
         }
+        // handle Error
+        if(url.pathname === "/feed"){
+            throw new Error('Could not fetch feed')
+        }
         return new Response("Error 404");
+    },
+    error(error){
+        return new Response(`<pre> ${error} \n ${error.stack} </pre>`, {
+            headers: {
+                'Content-Type': 'text/html'
+            }
+        })
     }
 })
 
