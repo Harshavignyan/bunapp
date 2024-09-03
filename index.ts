@@ -36,6 +36,9 @@ const server = serve({
             const ip = server.requestIP(req);
             return new Response(`Your IP is ${ip}`);
         }
+        if (url.pathname === "/greet") {
+            return new Response(Bun.file('./greet.txt'))
+        }
         // handle Error
         if(url.pathname === "/feed"){
             throw new Error('Could not fetch feed')
